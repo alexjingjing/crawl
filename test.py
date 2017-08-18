@@ -14,7 +14,7 @@ dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap[
     "phantomjs.page.settings.userAgent"] = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0"
 # PHANTOMJS_PATH = "E:\Project\Python\phantomjs-2.1.1-windows\\bin\phantomjs.exe"
-PHANTOMJS_PATH = "/home/lsm1993/phantomjs-2.1.1-linux-x86_64/bin"
+PHANTOMJS_PATH = "/home/lsm1993/phantomjs-2.1.1-linux-x86_64/bin/phantomjs"
 driver = webdriver.PhantomJS(PHANTOMJS_PATH,
                              desired_capabilities=dcap)
 
