@@ -14,19 +14,20 @@ dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap[
     "phantomjs.page.settings.userAgent"] = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0"
 # PHANTOMJS_PATH = "E:\Project\Python\phantomjs-2.1.1-windows\\bin\phantomjs.exe"
-PHANTOMJS_PATH = "/home/lsm1993/phantomjs-2.1.1-linux-x86_64/bin/phantomjs"
+# PHANTOMJS_PATH = "/home/lsm1993/phantomjs-2.1.1-linux-x86_64/bin/phantomjs"
+PHANTOMJS_PATH = "/Users/liusiming/phantomjs/phantomjs-2.1.1-macosx/bin/phantomjs"
 driver = webdriver.PhantomJS(PHANTOMJS_PATH,
                              desired_capabilities=dcap)
 
 base_url = "https://sjipiao.fliggy.com/flight_search_result.htm?" \
-           + "searchBy=1230tripType=0&depCityName={}&depCity=&" \
+           + "searchBy=1280tripType=0&depCityName={}&depCity=&" \
            + "arrCityName={}&arrCity=&depDate={}&arrDate="
 
 
 def test_selenium():
     dep_city = '上海'
     arr_city = '北京'
-    dep_date = '2017-08-17'
+    dep_date = '2017-08-19'
     dep_city_name = format_city_name(dep_city)
     arr_city_name = format_city_name(arr_city)
     driver.get(base_url.format(dep_city_name, arr_city_name, dep_date))
