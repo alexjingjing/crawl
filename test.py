@@ -9,6 +9,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from bs4 import BeautifulSoup
 
 from model.airticket import AirTicket
+from model import session
 
 dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap[
@@ -27,7 +28,7 @@ base_url = "https://sjipiao.fliggy.com/flight_search_result.htm?" \
 def test_selenium():
     dep_city = '上海'
     arr_city = '北京'
-    dep_date = '2017-08-19'
+    dep_date = '2017-08-23'
     dep_city_name = format_city_name(dep_city)
     arr_city_name = format_city_name(arr_city)
     driver.get(base_url.format(dep_city_name, arr_city_name, dep_date))
@@ -44,17 +45,18 @@ def test_selenium():
             airline_types = flight_item_ps[1]
             airline_type = str(airline_types.contents[0]) + str(airline_types.a.string)
             dep_time = flight_item_ps[2].string
-            arr_time = flight_item_ps[3].string
+            arr_time = flight_item_ps[3].span.string
             dep_airport = flight_item_ps[4].string
             arr_airport = flight_item_ps[5].string
             prices = flight_item.find("td", class_="flight-price")
             price_spans = prices.find_all("span")
             price = price_spans[1].string
             discount = price_spans[2].string
-            air_ticket = AirTicket(airline_name=airline_name, flight_type=airline_type, dep_time=dep_time,
-                                   arr_time=arr_time, dep_airport=dep_airport, arr_airport=arr_airport,
-                                   price=int(price), discount=discount, dep_date=dep_date)
-            air_ticket.save()
+            air_ticket = AirTicket(airline_name, airline_type, dep_time, arr_time, dep_airport, arr_airport, int(price),
+                                   discount, dep_date)
+            session.add(air_ticket)
+            session.commit()
+            session.close()
     except Exception as e:
         print(str(e))
     finally:
