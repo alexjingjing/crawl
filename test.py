@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
 
 import time
+
+from bs4 import BeautifulSoup
+from app.model import session
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from bs4 import BeautifulSoup
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
-from model.airticket import AirTicket
-from model import session
+from app.model.airticket import AirTicket
 
 dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap[
     "phantomjs.page.settings.userAgent"] = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0"
+dcap[
+    "phantomjs.page.settings.userAgent"] = \
+    "User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) " \
+    + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+
 PHANTOMJS_PATH = "E:\Project\Python\phantomjs-2.1.1-windows\\bin\phantomjs.exe"
 # PHANTOMJS_PATH = "/home/lsm1993/phantomjs-2.1.1-linux-x86_64/bin/phantomjs"
 # PHANTOMJS_PATH = "/Users/liusiming/phantomjs/phantomjs-2.1.1-macosx/bin/phantomjs"

@@ -11,7 +11,7 @@ Base = declarative_base()
 #                        encoding='utf-8')
 # engine = create_engine('mysql+pymysql://lsm1993:password@localhost:3306/air_ticket?charset=utf8',
 #                        encoding='utf-8')
-engine = create_engine('mysql+pymysql://lsm1993:password@@118.190.87.126:3306/air_ticket?charset=utf8',
+engine = create_engine('mysql+pymysql://lsm1993:password@118.190.87.126:3306/air_ticket?charset=utf8',
                        encoding='utf-8')
 # 创建DBSession类型:
 session = scoped_session(sessionmaker(bind=engine))

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import datetime
+
 from sqlalchemy import Column, String, BIGINT, INTEGER, TIMESTAMP
-from model import Base
+
+from app.model import Base
 
 
 class AirTicket(Base):
