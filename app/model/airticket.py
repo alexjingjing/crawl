@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import datetime
+import pytz
+from datetime import datetime
 
 from sqlalchemy import Column, String, BIGINT, INTEGER, TIMESTAMP
 
@@ -21,7 +22,7 @@ class AirTicket(Base):
     price = Column(INTEGER)
     discount = Column(String)
     dep_date = Column(String)
-    create_time = Column(TIMESTAMP, default=datetime.datetime.now)
+    create_time = Column(TIMESTAMP, default=datetime.now(pytz.timezone('Asia/Shanghai')))
     update_time = Column(TIMESTAMP)
 
     def __init__(self, airline_name, flight_type, dep_time, arr_time, dep_airport, arr_airport, price, discount,

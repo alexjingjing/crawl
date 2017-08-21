@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-import datetime
+from datetime import datetime
+
+import pytz
 from sqlalchemy import Column, String, BIGINT, INTEGER, TIMESTAMP
 
 from app.model import Base
 
 SUCCESS = 1000
 FAIL = 1001
+
 
 class CrawlLog(Base):
     # 表名
@@ -17,7 +20,7 @@ class CrawlLog(Base):
     dep_date = Column(String)
     status = Column(INTEGER)
     search_by = Column(String)
-    create_time = Column(TIMESTAMP, default=datetime.datetime.now)
+    create_time = Column(TIMESTAMP, default=datetime.now(pytz.timezone('Asia/Shanghai')))
     update_time = Column(TIMESTAMP)
 
     def __init__(self, dep_city, arr_city, dep_date, status, search_by):

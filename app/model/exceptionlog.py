@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import datetime
+import pytz
+from datetime import datetime
 from sqlalchemy import Column, String, BIGINT, INTEGER, TIMESTAMP
 
 from app.model import Base
@@ -12,7 +13,7 @@ class ExceptionLog(Base):
     id = Column(BIGINT, primary_key=True)
     exception_code = Column(INTEGER)
     exception_info = Column(String)
-    create_time = Column(TIMESTAMP, default=datetime.datetime.now)
+    create_time = Column(TIMESTAMP, default=datetime.now(pytz.timezone('Asia/Shanghai')))
     update_time = Column(TIMESTAMP)
 
     def __init__(self, exception_code, exception_info):

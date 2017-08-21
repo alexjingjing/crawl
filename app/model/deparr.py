@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import datetime
+import pytz
+from datetime import datetime
 from sqlalchemy import Column, String, BIGINT, TIMESTAMP
 
 from app.model import Base
@@ -13,7 +14,7 @@ class DepArr(Base):
     dep_city = Column(String, primary_key=True)
     arr_city = Column(String, primary_key=True)
     date_type = Column(BIGINT)
-    create_time = Column(TIMESTAMP, default=datetime.datetime.now)
+    create_time = Column(TIMESTAMP, default=datetime.now(pytz.timezone('Asia/Shanghai')))
     update_time = Column(TIMESTAMP)
 
     def __init__(self, dep_city, arr_city, date_type=1):
