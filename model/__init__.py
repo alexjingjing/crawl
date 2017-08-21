@@ -7,11 +7,11 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 # 初始化数据库连接:
-# engine = create_engine('mysql+pymysql://root:1q2w3e4r%T@@139.196.96.160:3306/air_ticket?charset=utf8',
+# engine = create_engine('mysql+pymysql://lsm:password@139.196.96.160:3306/air_ticket?charset=utf8',
 #                        encoding='utf-8')
-# engine = create_engine('mysql+pymysql://root:Mygratestate2017@localhost:3306/air_ticket?charset=utf8',
+# engine = create_engine('mysql+pymysql://lsm1993:password@localhost:3306/air_ticket?charset=utf8',
 #                        encoding='utf-8')
-engine = create_engine('mysql+pymysql://root:1q2w3e4r%T@@118.190.87.126:3306/air_ticket?charset=utf8',
+engine = create_engine('mysql+pymysql://lsm1993:password@@118.190.87.126:3306/air_ticket?charset=utf8',
                        encoding='utf-8')
 # 创建DBSession类型:
 session = scoped_session(sessionmaker(bind=engine))
