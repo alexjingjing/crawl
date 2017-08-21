@@ -13,4 +13,4 @@ if __name__ == '__main__':
         day_gap_list = eval('[' + day_gap + ']')
         for gap in day_gap_list:
             dep_date = str(datetime.today() + timedelta(days=gap))[0:10]
-            crawl_task.apply_async(dep_arr.dep_city, dep_arr.arr_city, dep_date, count_down=get_rand_int)
+            crawl_task.apply_async((dep_arr.dep_city, dep_arr.arr_city, dep_date), count_down=get_rand_int)
