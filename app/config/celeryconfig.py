@@ -4,8 +4,8 @@ ENV = 'lsm'
 # ENV = 'pro_test'
 
 if ENV == 'lsm':
-    broker_url = 'redis://:1q2w3e4r%T@@192.168.2.201:6379/11'
-    result_backend = 'redis://:1q2w3e4r%T@@192.168.2.201:6379/12'
+    broker_url = 'redis://:1q2w3e4r%T@@localhost:6379/11'
+    result_backend = 'redis://:1q2w3e4r%T@@localhost:6379/12'
 
     timezone = 'Etc/GMT+8'
     enable_utc = True
