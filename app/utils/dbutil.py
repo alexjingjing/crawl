@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, timedelta
 from sqlalchemy import and_
 
 from app.model import session
@@ -9,15 +10,45 @@ from app.model.crawllog import CrawlLog, SUCCESS, FAIL
 
 
 def get_cities_to_crawl():
-    cities = session.query(DepArr).limit(5)
-    for dep_arr in cities:
-        if session.query(CrawlLog).filter(and_(CrawlLog.dep_city == dep_arr.dep_city,
-                                               CrawlLog.status == FAIL)).first() is not None:
-            cities.remove(dep_arr)
-            continue
     result = []
+    cities = session.query(DepArr).all()
     for dep_arr in cities:
-        result.append((dep_arr, get_date_type_by_id(dep_arr.date_type)))
+        print('cities>>>>>>')
+        day_gap = get_date_type_by_id(dep_arr.date_type).day_gap
+        day_gap_list = eval('[' + day_gap + ']')
+        for gap in day_gap_list:
+            print('gaps>>>>>>')
+            dep_date = str(datetime.today() + timedelta(days=gap))[0:10]
+            if session.query(CrawlLog).filter(and_(
+                            CrawlLog.dep_city == dep_arr.dep_city,
+                            CrawlLog.arr_city == dep_arr.arr_city,
+                            CrawlLog.dep_date == dep_date,
+                            CrawlLog.create_time >= datetime.today() - timedelta(days=1),
+                            CrawlLog.create_time <= datetime.today())).first() is None:
+                result.append((dep_arr.dep_city, dep_arr.arr_city, dep_date))
+    session.close()
+    return result
+
+
+def get_cities_to_crawl_with_offset(offset=0, limit=10):
+    result = []
+    cities = session.query(DepArr).offset(offset).limit(limit)
+    for dep_arr in cities:
+        print('cities>>>>>>')
+        day_gap = get_date_type_by_id(dep_arr.date_type).day_gap
+        day_gap_list = eval('[' + day_gap + ']')
+        for gap in day_gap_list:
+            print('gaps>>>>>>')
+            dep_date = str(datetime.today() + timedelta(days=gap))[0:10]
+            if session.query(CrawlLog).filter(and_(
+                            CrawlLog.dep_city == dep_arr.dep_city,
+                            CrawlLog.arr_city == dep_arr.arr_city,
+                            CrawlLog.dep_date == dep_date,
+                            CrawlLog.create_time >= datetime.today() - timedelta(days=1),
+                            CrawlLog.create_time <= datetime.today())).first() is None:
+                result.append((dep_arr.dep_city, dep_arr.arr_city, dep_date))
+    if len(result) == 0:
+        result = get_cities_to_crawl_with_offset(offset + 1, limit)
     session.close()
     return result
 
