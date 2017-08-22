@@ -51,6 +51,21 @@ def get_cities_to_crawl_with_offset(offset=0, limit=10):
     return result
 
 
+def get_cities_to_crawl_with_cities(dep_city, arr_city):
+    result = []
+    session = Session()
+    dep_arr = session.query(DepArr).filter(and_(DepArr.dep_city == dep_city,
+                                                DepArr.arr_city == arr_city)).first()
+    if dep_arr is not None:
+        day_gap = get_date_type_by_id(dep_arr.date_type).day_gap
+        day_gap_list = eval('[' + day_gap + ']')
+        for gap in day_gap_list:
+            dep_date = str(datetime.today() + timedelta(days=gap))[0:10]
+            result.append((dep_city, arr_city, dep_date))
+    session.close()
+    return result
+
+
 def get_date_type_by_id(date_type_id):
     session = Session()
     result = session.query(DateType).filter(DateType.id == date_type_id).first()
