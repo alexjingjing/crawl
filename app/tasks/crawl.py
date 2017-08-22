@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from app.model import session
+from app.model import Session
 from app.model.airticket import AirTicket
 from app.model.crawllog import SUCCESS, FAIL
 from app.tasks import app
@@ -51,6 +51,7 @@ def crawl_task(dep_city, arr_city, dep_date, search_by=1280):
             discount = price_spans[2].string
             air_ticket = AirTicket(airline_name, airline_type, dep_time, arr_time, dep_airport, arr_airport, int(price),
                                    discount, dep_date)
+            session = Session()
             session.add(air_ticket)
             session.commit()
             session.close()
