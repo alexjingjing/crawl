@@ -34,11 +34,9 @@ def get_cities_to_crawl_with_offset(offset=0, limit=10):
     result = []
     cities = session.query(DepArr).offset(offset).limit(limit)
     for dep_arr in cities:
-        print('cities>>>>>>')
         day_gap = get_date_type_by_id(dep_arr.date_type).day_gap
         day_gap_list = eval('[' + day_gap + ']')
         for gap in day_gap_list:
-            print('gaps>>>>>>')
             dep_date = str(datetime.today() + timedelta(days=gap))[0:10]
             if session.query(CrawlLog).filter(and_(
                             CrawlLog.dep_city == dep_arr.dep_city,
