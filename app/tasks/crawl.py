@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from app.model import Session
 from app.model.airticket import AirTicket
+from app.model.airticketie import AirTicketIe
 from app.model.crawllog import SUCCESS, FAIL
 from app.tasks import app
 from app.config.config import *
@@ -28,7 +29,7 @@ def crawl_task(dep_city, arr_city, dep_date, search_by=1280):
     driver.get(base_url.format(search_by, format_city_name(dep_city), format_city_name(arr_city), dep_date))
     try:
         element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'flight-list-box'))
+            EC.presence_of_element_located((By.CLASS_NAME, 'J_FlightItem'))
         )
         time.sleep(0.5)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -65,22 +66,59 @@ def crawl_task(dep_city, arr_city, dep_date, search_by=1280):
 
 
 @app.task(name='crawl_task_ie')
-def crawl_task(dep_city, arr_city, dep_date, search_by=1281):
+def crawl_task_ie(dep_city, arr_city, dep_city_code, arr_city_code, dep_date, search_by=1281):
+    session = Session()
     dcap[
         "phantomjs.page.settings.userAgent"] = \
         "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0"
     driver = webdriver.PhantomJS(PHANTOMJS_PATH, desired_capabilities=dcap)
-    driver.get(base_url_ie.format(search_by, format_city_name(dep_city), format_city_name(arr_city), dep_date))
+    driver.get(base_url_ie.format(1282, format(dep_city), dep_city_code, format(arr_city), arr_city_code, dep_date))
     try:
         element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, 'flight-list-box'))
         )
         time.sleep(0.5)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
-        flight_items = soup.find_all("div", class_="list")
+        flight_items = soup.find_all("div", class_="J_FlightItem")
         if len(flight_items) == 0:
             save_exception_log(ExceptionInfo.WEB_ELEMENT_NOT_FOUND)
             raise Exception('no elements!')
+        for flight_item in flight_items:
+            flight_info = flight_item.find("div", class_="flight-info")
+            airline_name = flight_info.span.string
+            flight_type = str(flight_info.find("p", class_="tip-info").string).strip()
+            col_time = flight_item.find("td", class_="col-time")
+            dep_time = col_time.find_all("p")[0].string
+            dep_airport = col_time.find_all("p")[1].string
+            time_arrow = col_time.find("div", class_="time-arrow")
+            arrow = time_arrow.find("div", class_="arrow")
+            transfer_bool = True if arrow.p is not None else False
+            transfer_city = str(time_arrow.find("div", class_="transfer-city").string).strip() if transfer_bool else ''
+            col_arr_time = flight_item.find("td", class_="col-arr-time")
+            arr_time = col_arr_time.find("p", "time-info").string
+            if arr_time is None:
+                arr_time_element = col_arr_time.find("p", "time-info").contents
+                arr_time = str(arr_time_element[0])
+            arr_airport = col_arr_time.find_all("p")[1].string
+            duration = flight_item.find("td", class_="col-totaltime").p.string
+            col_price = flight_item.find("td", class_="col-price")
+            price = str(col_price.find("div", class_="total-price").find("span", class_="price-num").contents[1])
+            ticket_price = str(col_price.find("div", class_="hide-when-total-price-sort").
+                               find("span", class_="price-num").contents[1])
+            tax_price = str(col_price.find("div", class_="hide-when-total-price-sort").
+                            find("span", class_="tax-price").contents[2])
+            col_select = flight_item.find("td", class_="col-select")
+            ticket_status = col_select.find("div", class_="quantity").string \
+                if col_select.find("div", class_="quantity") is not None else ''
+            is_transfer = 1 if transfer_bool else 0
+            air_ticket_ie = AirTicketIe(airline_name, flight_type, dep_time, arr_time, dep_airport, arr_airport,
+                                        int(price), '暂无字段',
+                                        dep_date, dep_city, arr_city, dep_city_code, arr_city_code, duration,
+                                        is_transfer,
+                                        transfer_city, ticket_status, int(tax_price), int(ticket_price))
+            session.add(air_ticket_ie)
+            session.commit()
+            session.close()
     except Exception as e:
         einfo = ExceptionInfo.EXCEPTION_OCCURRED
         save_exception_log((einfo[0], einfo[1] + str(e)))

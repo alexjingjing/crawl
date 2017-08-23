@@ -5,6 +5,7 @@ from sqlalchemy import and_
 from app.model import Session
 from app.model.airticket import AirTicket
 from app.model.deparr import DepArr, DateType
+from app.model.deparrie import DepArrIe
 from app.model.exceptionlog import ExceptionLog
 from app.model.crawllog import CrawlLog, SUCCESS, FAIL
 
@@ -62,6 +63,21 @@ def get_cities_to_crawl_with_cities(dep_city, arr_city):
         for gap in day_gap_list:
             dep_date = str(datetime.today() + timedelta(days=gap))[0:10]
             result.append((dep_city, arr_city, dep_date))
+    session.close()
+    return result
+
+
+def get_ie_cities_to_crawl_with_cities(dep_city, arr_city):
+    result = []
+    session = Session()
+    dep_arr_ie = session.query(DepArrIe).filter(and_(DepArrIe.dep_city == dep_city,
+                                                     DepArrIe.arr_city == arr_city)).first()
+    if dep_arr_ie is not None:
+        day_gap = get_date_type_by_id(dep_arr_ie.date_type).day_gap
+        day_gap_list = eval('[' + day_gap + ']')
+        for gap in day_gap_list:
+            dep_date = str(datetime.today() + timedelta(days=gap))[0:10]
+            result.append((dep_city, arr_city, dep_arr_ie.dep_city_code, dep_arr_ie.arr_city_code, dep_date))
     session.close()
     return result
 

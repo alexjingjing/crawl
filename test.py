@@ -11,6 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 from app.model.airticket import AirTicket
+from app.model.airticketie import AirTicketIe
 
 dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap[
@@ -20,9 +21,9 @@ dcap[
     "User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) " \
     + "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
 
-PHANTOMJS_PATH = "E:\Project\Python\phantomjs-2.1.1-windows\\bin\phantomjs.exe"
+# PHANTOMJS_PATH = "E:\Project\Python\phantomjs-2.1.1-windows\\bin\phantomjs.exe"
 # PHANTOMJS_PATH = "/home/lsm1993/phantomjs-2.1.1-linux-x86_64/bin/phantomjs"
-# PHANTOMJS_PATH = "/Users/liusiming/phantomjs/phantomjs-2.1.1-macosx/bin/phantomjs"
+PHANTOMJS_PATH = "/Users/liusiming/phantomjs/phantomjs-2.1.1-macosx/bin/phantomjs"
 driver = webdriver.PhantomJS(PHANTOMJS_PATH,
                              desired_capabilities=dcap)
 
@@ -71,11 +72,13 @@ def test_selenium():
     except Exception as e:
         print(str(e))
     finally:
+        session.close()
         driver.save_screenshot("./test.png")
         driver.quit()
 
 
 def test_selenium_ie():
+    session = Session()
     dep_city = '上海'
     dep_city_code = 'SHA'
     arr_city = '柬埔寨'
@@ -84,12 +87,10 @@ def test_selenium_ie():
     dep_city_name = format_city_name(dep_city)
     arr_city_name = format_city_name(arr_city)
     driver.get(base_url_ie.format(1282, dep_city_name, dep_city_code, arr_city_name, arr_city_code, dep_date))
-    print("driver ready")
     try:
         element = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.CLASS_NAME, 'J_FlightItem'))
         )
-        print("element is ready")
         time.sleep(0.5)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         flight_items = soup.find_all("div", class_="J_FlightItem")
@@ -102,8 +103,8 @@ def test_selenium_ie():
             dep_airport = col_time.find_all("p")[1].string
             time_arrow = col_time.find("div", class_="time-arrow")
             arrow = time_arrow.find("div", class_="arrow")
-            is_transfer = True if arrow.p is not None else False
-            transfer_city = str(time_arrow.find("div", class_="transfer-city").string).strip() if is_transfer else ''
+            transfer_bool = True if arrow.p is not None else False
+            transfer_city = str(time_arrow.find("div", class_="transfer-city").string).strip() if transfer_bool else ''
             col_arr_time = flight_item.find("td", class_="col-arr-time")
             arr_time = col_arr_time.find("p", "time-info").string
             if arr_time is None:
@@ -116,15 +117,25 @@ def test_selenium_ie():
             ticket_price = str(col_price.find("div", class_="hide-when-total-price-sort").
                                find("span", class_="price-num").contents[1])
             tax_price = str(col_price.find("div", class_="hide-when-total-price-sort").
-                            find("span", class_="tax-price").contents[1])
+                            find("span", class_="tax-price").contents[2])
             col_select = flight_item.find("td", class_="col-select")
             ticket_status = col_select.find("div", class_="quantity").string \
-                if col_select.find("div",class_="quantity") is not None else ''
+                if col_select.find("div", class_="quantity") is not None else ''
+            is_transfer = 1 if transfer_bool else 0
+            air_ticket_ie = AirTicketIe(airline_name, flight_type, dep_time, arr_time, dep_airport, arr_airport,
+                                        int(price), '暂无字段',
+                                        dep_date, dep_city, arr_city, dep_city_code, arr_city_code, duration,
+                                        is_transfer,
+                                        transfer_city, ticket_status, int(tax_price), int(ticket_price))
+            session.add(air_ticket_ie)
+            session.commit()
+            session.close()
             print(flight_type, dep_time, dep_airport, arr_time, arr_airport, duration, is_transfer, transfer_city,
                   price, ticket_price, tax_price, ticket_status)
     except Exception as e:
         print(str(e))
     finally:
+        session.close()
         driver.save_screenshot("./test.png")
         driver.quit()
 

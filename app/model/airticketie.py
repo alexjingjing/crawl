@@ -2,7 +2,7 @@
 import pytz
 from datetime import datetime
 
-from sqlalchemy import Column, String, BIGINT, INTEGER, TIMESTAMP
+from sqlalchemy import Column, String, BIGINT, SMALLINT, INTEGER, TIMESTAMP
 
 from app.model import Base
 
@@ -29,11 +29,11 @@ class AirTicketIe(Base):
     dep_city_code = Column(String)
     arr_city_code = Column(String)
     duration = Column(String)
-    is_transfer = Column(String)
+    is_transfer = Column(SMALLINT)
     transfer_city = Column(String)
     ticket_status = Column(String)
-    tax_price = Column(String)
-    ticket_price = Column(String)
+    tax_price = Column(INTEGER)
+    ticket_price = Column(INTEGER)
 
     def __init__(self, airline_name, flight_type, dep_time, arr_time, dep_airport, arr_airport, price, discount,
                  dep_date, dep_city, arr_city, dep_city_code, arr_city_code, duration, is_transfer, transfer_city,
