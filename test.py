@@ -3,7 +3,7 @@
 import time
 
 from bs4 import BeautifulSoup
-from app.model import session
+from app.model import Session
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -30,8 +30,13 @@ base_url = "https://sjipiao.fliggy.com/flight_search_result.htm?" \
            + "searchBy=1270tripType=0&depCityName={}&depCity=&" \
            + "arrCityName={}&arrCity=&depDate={}&arrDate="
 
+base_url_ie = "https://sijipiao.fliggy.com/ie/flight_search_result.htm?" \
+              + "searchBy={}&_input_charset=utf-8&tripType=0&depCityName={}&depCity={}&" \
+              + "arrCityName={}&arrCity={}&depDate={}&arrDate="
+
 
 def test_selenium():
+    session = Session()
     dep_city = '上海'
     arr_city = '北京'
     dep_date = '2017-08-21'
@@ -70,9 +75,63 @@ def test_selenium():
         driver.quit()
 
 
+def test_selenium_ie():
+    dep_city = '上海'
+    dep_city_code = 'SHA'
+    arr_city = '柬埔寨'
+    arr_city_code = 'REP'
+    dep_date = '2017-08-25'
+    dep_city_name = format_city_name(dep_city)
+    arr_city_name = format_city_name(arr_city)
+    driver.get(base_url_ie.format(1282, dep_city_name, dep_city_code, arr_city_name, arr_city_code, dep_date))
+    print("driver ready")
+    try:
+        element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'J_FlightItem'))
+        )
+        print("element is ready")
+        time.sleep(0.5)
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        flight_items = soup.find_all("div", class_="J_FlightItem")
+        for flight_item in flight_items:
+            flight_info = flight_item.find("div", class_="flight-info")
+            airline_name = flight_info.span.string
+            flight_type = str(flight_info.find("p", class_="tip-info").string).strip()
+            col_time = flight_item.find("td", class_="col-time")
+            dep_time = col_time.find_all("p")[0].string
+            dep_airport = col_time.find_all("p")[1].string
+            time_arrow = col_time.find("div", class_="time-arrow")
+            arrow = time_arrow.find("div", class_="arrow")
+            is_transfer = True if arrow.p is not None else False
+            transfer_city = str(time_arrow.find("div", class_="transfer-city").string).strip() if is_transfer else ''
+            col_arr_time = flight_item.find("td", class_="col-arr-time")
+            arr_time = col_arr_time.find("p", "time-info").string
+            if arr_time is None:
+                arr_time_element = col_arr_time.find("p", "time-info").contents
+                arr_time = str(arr_time_element[0])
+            arr_airport = col_arr_time.find_all("p")[1].string
+            duration = flight_item.find("td", class_="col-totaltime").p.string
+            col_price = flight_item.find("td", class_="col-price")
+            price = str(col_price.find("div", class_="total-price").find("span", class_="price-num").contents[1])
+            ticket_price = str(col_price.find("div", class_="hide-when-total-price-sort").
+                               find("span", class_="price-num").contents[1])
+            tax_price = str(col_price.find("div", class_="hide-when-total-price-sort").
+                            find("span", class_="tax-price").contents[1])
+            col_select = flight_item.find("td", class_="col-select")
+            ticket_status = col_select.find("div", class_="quantity").string \
+                if col_select.find("div",class_="quantity") is not None else ''
+            print(flight_type, dep_time, dep_airport, arr_time, arr_airport, duration, is_transfer, transfer_city,
+                  price, ticket_price, tax_price, ticket_status)
+    except Exception as e:
+        print(str(e))
+    finally:
+        driver.save_screenshot("./test.png")
+        driver.quit()
+
+
 def format_city_name(name):
     return ((str(name.encode('GB2312'))[2:-1]).replace('\\x', '%')).upper()
 
 
 if __name__ == '__main__':
-    test_selenium()
+    test_selenium_ie()

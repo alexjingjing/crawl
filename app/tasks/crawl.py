@@ -64,6 +64,32 @@ def crawl_task(dep_city, arr_city, dep_date, search_by=1280):
         return dep_city, arr_city, dep_date, search_by
 
 
+@app.task(name='crawl_task_ie')
+def crawl_task(dep_city, arr_city, dep_date, search_by=1281):
+    dcap[
+        "phantomjs.page.settings.userAgent"] = \
+        "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0"
+    driver = webdriver.PhantomJS(PHANTOMJS_PATH, desired_capabilities=dcap)
+    driver.get(base_url_ie.format(search_by, format_city_name(dep_city), format_city_name(arr_city), dep_date))
+    try:
+        element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'flight-list-box'))
+        )
+        time.sleep(0.5)
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        flight_items = soup.find_all("div", class_="list")
+        if len(flight_items) == 0:
+            save_exception_log(ExceptionInfo.WEB_ELEMENT_NOT_FOUND)
+            raise Exception('no elements!')
+    except Exception as e:
+        einfo = ExceptionInfo.EXCEPTION_OCCURRED
+        save_exception_log((einfo[0], einfo[1] + str(e)))
+        raise Exception(str(e))
+    finally:
+        driver.quit()
+        return dep_city, arr_city, dep_date, search_by
+
+
 def format_city_name(name):
     return ((str(name.encode('GB2312'))[2:-1]).replace('\\x', '%')).upper()
 
