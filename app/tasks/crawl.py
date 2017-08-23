@@ -75,7 +75,7 @@ def crawl_task_ie(dep_city, arr_city, dep_city_code, arr_city_code, dep_date, se
     driver.get(base_url_ie.format(1282, format(dep_city), dep_city_code, format(arr_city), arr_city_code, dep_date))
     try:
         element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'flight-list-box'))
+            EC.presence_of_element_located((By.CLASS_NAME, 'J_FlightItem'))
         )
         time.sleep(0.5)
         soup = BeautifulSoup(driver.page_source, 'html.parser')
