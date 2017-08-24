@@ -21,7 +21,11 @@ def crawl_with_dep_city(dep_city):
 
 
 if __name__ == '__main__':
+    crawl_with_dep_city('广州')
+    crawl_ie_with_cities('上海', '纽约')
     crawl_ie_with_cities('上海', '柬埔寨')
+    get_ie_cities_to_crawl_with_cities('上海', '纽约')
+    get_ie_cities_to_crawl_with_cities('上海', '柬埔寨')
     result = []
     mode = sys.argv[1] if len(sys.argv) > 1 else ''
     if len(mode) > 0 and mode != 'all':
