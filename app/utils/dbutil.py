@@ -67,6 +67,20 @@ def get_cities_to_crawl_with_cities(dep_city, arr_city):
     return result
 
 
+def get_cities_to_crawl_with_dep_city(dep_city):
+    result = []
+    session = Session()
+    dep_arrs = session.query(DepArr).filter(and_(DepArr.dep_city == dep_city)).all()
+    for dep_arr in dep_arrs:
+        day_gap = get_date_type_by_id(dep_arr.date_type).day_gap
+        day_gap_list = eval('[' + day_gap + ']')
+        for gap in day_gap_list:
+            dep_date = str(datetime.today() + timedelta(days=gap))[0:10]
+            result.append((dep_city, dep_arr.arr_city, dep_date))
+    session.close()
+    return result
+
+
 def get_ie_cities_to_crawl_with_cities(dep_city, arr_city):
     result = []
     session = Session()

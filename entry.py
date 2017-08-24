@@ -13,6 +13,13 @@ def crawl_ie_with_cities(dep_city, arr_city):
                                   count_down=get_rand_int())
 
 
+def crawl_with_dep_city(dep_city):
+    city_result = get_cities_to_crawl_with_dep_city(dep_city)
+    for city in city_result:
+        crawl_task.apply_async((city[0], city[1], city[2]),
+                               count_down=get_rand_int())
+
+
 if __name__ == '__main__':
     crawl_ie_with_cities('上海', '柬埔寨')
     result = []
